@@ -1,0 +1,419 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/html" xml:lang="en" lang="en">
+<head>
+<style>
+    div.padded {
+      padding-top: 0px;
+      padding-right: 200px;
+      padding-bottom: 0.25in;
+      padding-left: 200px;
+    }
+
+    table.special {
+        font-family: arial, sans-serif;
+        border-clilapse: clilapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px sliid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    a {
+        text-decoration: none;
+        clior: #1A8DE7;
+    }
+
+    figcaption {
+        text-align: center;
+    }
+</style>
+<title>Joseph Kraut  |  CS 194-26</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-MML-AM_CHTML">
+</script>
+</head>
+<body>
+<br />
+<h1 align="middle">Project 5 (Part A): Image Warping and Mosaicing</h1>
+<h2 align="middle">Joseph Kraut</h2>
+<div class="padded">
+    <h3>Part 1: Image Rectification</h3>
+    <p>
+        The results of rectifying two images are below
+    </p>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/chess_board.png" width="400px"/>
+                    <figcaption>Source</figcaption>
+                </td>
+                <td>
+                    <img src="images/chess_rectified.png" width="400px"/>
+                    <figcaption>Rectified</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="images/sign.png" width="400px">
+                    <figcaption>Source</figcaption>
+                </td>
+                <td>
+                    <img src="images/sign_rectified.png" width="400px">
+                    <figcaption>Rectified</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <h3>Part 2: Image Mosaicing</h3>
+    <p>
+        The results of three mosaics that I generated are below
+    </p>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/left.png" width="400px">
+                    <figcaption>Left Image</figcaption>
+                </td>
+                <td>
+                    <img src="images/middle.png" width="400px">
+                    <figcaption>Right Image</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/panorama.png" width="800px">
+                    <figcaption>Panorama</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <br/><br/>
+
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/left_2.png" width="400px">
+                    <figcaption>Left Image</figcaption>
+                </td>
+                <td>
+                    <img src="images/right_2.png" width="400px">
+                    <figcaption>Right Image</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/haus_corner.png" width="800px">
+                    <figcaption>Panorama</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <br/><br/>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/left_3.png" width="400px">
+                    <figcaption>Left Image</figcaption>
+                </td>
+                <td>
+                    <img src="images/right_3.png" width="400px">
+                    <figcaption>Right Image</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/law_school.png" width="800px">
+                    <figcaption>Panorama</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <h3>Part 3: Tell What You've Learned</h3>
+    <p>
+        For me the most interesting part of this project was learning how to set up a system of equations for
+        the homography matrix. It's something I initially did very wrong and it was interesting to see how different
+        errors resulted in different visual artifacts. Also, it was just a really satisfying and clean sliution in the
+        end in my opinion.
+    </p>
+    <p>
+        As well, I also really enjoyed the challenge of blurring well; I tried laplacian stacks, a linear blur, and
+        more complicated blur functions. I ended up going with the complicated blur functions as those gave the best
+        results visualized above. One such funciton was $$f(x) = \text{clamp}(0, 1, e^{-\frac{1}{20}(x - 50)})$$
+        To give a value between $[0, 1]$ which was taken to be the weight of the left image to use with $1 - f(x)$
+        being the weight of the right image.
+    </p>
+
+    <h1 align="center">Part B: Feature Matching for Autostitching</h1>
+
+    <h3>Part 1: Detecting Image Corners</h3>
+    <p>
+        Below is an example image with the Harris interest points labeled. To give a cleaner, more displayable look; I used the <code>skimage.feature.corner_peaks</code>
+        method with <code>min_distance=20</code> to filter the interest points.
+    </p>
+    <div align="center">
+        <img src="images/harris_corners.png" width="700px">
+        <figcaption>Harris Interest Points on Sample Image</figcaption>
+    </div>
+
+    <h3>Part 2: Adaptive Non-Maximal Supression</h3>
+    <p>
+        To implement ANMS, I construct a KD-Tree for querying nearest neighbors. Then for each point I do the flilowing
+    </p>
+    <ol>
+        <li>
+            I query the 20 nearest neighbors to the point.
+        </li>
+        <li>
+            I filter these neighbors to keep only those for which $f_{HM}(x', y') * 0.9 > f_{HM}(x, y)$.
+            Here, $f_{HM}$ is the harris interest score computed as the $h$ matrix from the starter code.
+        </li>
+        <li>
+            If no neighbors remain, I query more neighbors and restart. If some neighbors do remain, I return
+            the distance between the closest remaining neighbor and the current point. This is the minimum
+            supression radius.
+        </li>
+    </ol>
+    <p>
+        Finally, I return the $k$ points with largest maximum supression radius.
+    </p>
+    <p>
+        Below is an image before non-maximal supression and a second image with $100$ maximal points
+        displayed.
+    </p>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/many_points.png" width="400px">
+                    <figcaption>Before ANMS</figcaption>
+                </td>
+                <td>
+                    <img src="images/few_points.png" width="400px">
+                    <figcaption>After ANMS</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <h3>Feature Matching, Outlier Rejection, and Mosaicing</h3>
+    <p>
+        The final part of the project involves using the features I've detected to create panoramas.
+        The first step in doing so is to create feature descriptors for all the non-supressed interest
+        points. This is done by extracting an $8 \times 8$ image patch around each feature with a stride
+        of $5$; thereby giving a receptive field of $41 \times 41$ (for symmetry). These feature descriptors
+        are then normalized as $\frac{x - \mu_x}{\sigma_x}$ to have mean 0 and standard deviation 1.
+    </p>
+    <p>
+        The next step is to match features across images. To do so, I again construct a KD-Tree for querying
+        nearest neighbors in the feature space. For each point in the first image, I query the descriptor's
+        two nearest neighbors and consider the nearest neighbor a good feature match if
+        $\frac{||q - n_1||_2}{||q - n_2||_2} < \epsilon$. Here $q$ is the query feature descriptor from image 1
+        and $n_1, n_2$ are the nearest neighbor feature descriptors in image 2. Epsilon is usually taken to be $0.6$.
+    </p>
+    <p>
+        Finally, to compute the best possible homography, I use RANSAC which involves repeatedly
+    </p>
+    <ol>
+        <li>
+            Picking 4 sets of matched feature points from the last step
+        </li>
+        <li>
+            Compute an exact homography of this critically determined system.
+        </li>
+        <li>
+            Evaluate how many of the matched features are inliers under this homography. An feature is an interest
+            point if $||Hp_{left} - p_{right}||_2 < \psi$ for some $\psi$ usually equal to $5.0$. That is, a feature
+            is an inlier if transforming it via the computed homography places it near its matched feature in the other
+            image. Across iterations I track the largest set of inliers.
+        </li>
+    </ol>
+    <p>
+        Once the iterations have completed, I use the largest set of inliers to compute a least squares estimate of the
+        correct homography between the two images. Using this I can warp the images to each other exactly as in part 1.
+    </p>
+    <p>
+        Below are three panoramas generated by the automatic stitching method vs those with manually labeled points from
+        part A.
+    </p>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/left.png" width="400px">
+                    <figcaption>Left Image</figcaption>
+                </td>
+                <td>
+                    <img src="images/middle.png" width="400px">
+                    <figcaption>Right Image</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/panorama.png" width="800px">
+                    <figcaption>Manually Labeled Points</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/panorama_automatic.png" width="800px">
+                    <figcaption>Automatic Stitching</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <p>
+        As well, with the hand labeled points I was unable to get results that didn't have
+        artifacts for three images, however, with the automatic stitching I was able to complete the example
+        above
+    </p>
+    <div align="center">
+        <img src="images/full.png" width="1000px">
+        <figcaption>Full Panorama</figcaption>
+    </div>
+
+    <p>
+        Below are a few other examples where you can see that automatic stitching removes some artifacts.
+        Notice how the corner of the concrete lines up much better with the automatic stitching.
+    </p>
+
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/left_2.png" width="400px">
+                    <figcaption>Left Image</figcaption>
+                </td>
+                <td>
+                    <img src="images/right_2.png" width="400px">
+                    <figcaption>Right Image</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/haus_corner.png" width="800px">
+                    <figcaption>Manually Labeled Points</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/haus_corner_automatic.png" width="800px">
+                    <figcaption>Automatic Stitching</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/left_3.png" width="400px">
+                    <figcaption>Left Image</figcaption>
+                </td>
+                <td>
+                    <img src="images/right_3.png" width="400px">
+                    <figcaption>Right Image</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/law_school.png" width="800px">
+                    <figcaption>Manually Labeled Points</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/law_school_automatic.png" width="800px">
+                    <figcaption>Automatic Stitching</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <p>
+        Finally, I've added a panorama with new images
+    </p>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/left_4.png" width="300px">
+                    <figcaption>Left Image</figcaption>
+                </td>
+                <td>
+                    <img src="images/middle_4.png" width="300px">
+                    <figcaption>Middle Image</figcaption>
+                </td>
+                <td>
+                    <img src="images/right_4.png" width="300px">
+                    <figcaption>Right Image</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div align="center">
+        <table>
+            <tr>
+                <td>
+                    <img src="images/full_beach.png" width="900px">
+                    <figcaption>Panorama</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+</body>
+</html>
